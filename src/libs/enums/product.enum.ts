@@ -2,15 +2,6 @@ export enum ProductSize {
   SMALL = "SMALL",
   NORMAL = "NORMAL",
   LARGE = "LARGE",
-  SET = "SET",
-}
-
-export enum ProductVolume {
-  HALF = 0.5,
-  ONE = 1,
-  ONE_POINT_TWO = 1.2,
-  ONE_POINT_FIVE = 1.5,
-  TWO = 2,
 }
 
 export enum ProductStatus {
@@ -20,9 +11,9 @@ export enum ProductStatus {
 }
 
 export enum ProductCollection {
-  DISH = "DISH",
-  SALAD = "SALAD",
-  DESSERT = "DESERT",
-  DIRINK = "DRINK",
+  PROTEIN = "PROTEIN",
+  CREATINE = "CREATINE",
+  MASS_GAINER = "MASS_GAINER",
+  PRE_WORKOUT = "PRE_WORKOUT",
   OTHER = "OTHER",
 }

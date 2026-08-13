@@ -3,228 +3,193 @@
 <link rel="stylesheet" type="text/css" href="/css/products.css" />
 
 <body>
-  <div class="products-container">
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/product/all">Menu</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/user/all">Users</a>
-        </li>
-        <li
-          class="nav-item"
-          style="cursor: pointer"
-          onclick="return confirm('Do you want to logout?');"
-        >
-          <a class="nav-link" href="/admin/logout">Logout</a>
-        </li>
-      </ul>
-    </div>
+  <div class="layout">
 
-    <div class="restaurant-menu-frame">
-      <div class="board">
-        <div class="dishes-table">
-          <span class="new-dish-txt" style="margin-bottom: 30px">
-            RESTAURANT MENU
-          </span>
-          <table class="table table-bordered table-hover">
-            <thead class="thead-light">
-              <tr class="thead-light">
-                <th scope="col">T/r</th>
-                <th scope="col">Product Name</th>
-                <th scope="col">Product Type</th>
-                <th scope="col">Product Volume</th>
-                <th scope="col">Product Price</th>
-                <th scope="col">Product Left Count</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <!--  LOOP PRODUCTS: START  -->
-            <% products.map(function(value, key) { %>
-               <tbody style="background: white">
-              <td><%=key + 1 %></td>
-              <td><%= value.productName %></td>
-              <td><%= value.productCollection %></td>
-              <td><%= value.productCollection === 'DRINK' ? value.productVolume : value.productSize %></td>
-              <td><%= value.productPrice %></td>
-              <td><%= value.productLeftCount %></td>
-              <td>
-                <select class="spec-select new-product-status" id="<%= value._id %>">
-                  <option value="PAUSE" <%= value.productStatus === 'PAUSE' ? 'selected' : '' %> >PAUSE</option>
-                  <option value="PROCESS" <%= value.productStatus === 'PROCESS' ? 'selected' : '' %> >PROCESS</option>
-                  <option value="DELETE" <%= value.productStatus === 'DELETE' ? 'selected' : '' %> >DELETE</option>
-                </select>
-              </td>
-            </tbody>
-            <% }) %>
-            <!--  LOOP PRODUCTS: END  -->
-          </table>
-          <div
-            class="long-input"
-            style="align-items: flex-end; margin-bottom: 25px"
-          >
-            <button class="btn btn-primary" id="process-btn">
-              New Product
-            </button>
-          </div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand__sport">Next</span><span class="brand__pit">Gain</span>
+        <div class="brand__sub">Admin Panel</div>
+      </div>
+
+      <nav class="nav">
+        <a href="/admin" class="nav__item">
+          <svg viewBox="0 0 24 24" class="nav__icon"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+          Home
+        </a>
+        <a href="/admin/product/all" class="nav__item nav__item--active">
+          <svg viewBox="0 0 24 24" class="nav__icon"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+          Products
+        </a>
+        <a href="/admin/user/all" class="nav__item">
+          <svg viewBox="0 0 24 24" class="nav__icon"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M16 7a3 3 0 0 1 0 6"/><path d="M17 14c2.8.5 5 2.4 5 5"/></svg>
+          Users
+        </a>
+        <a href="/admin/logout" class="nav__item" onclick="return confirm('Do you want to logout?');">
+          <svg viewBox="0 0 24 24" class="nav__icon"><path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="admin-card">
+        <img class="admin-card__avatar" src="/img/admin.png" alt="Admin avatar" />
+        <div>
+          <div class="admin-card__name">Admin</div>
+          <div class="admin-card__role">Super Admin</div>
         </div>
+        <span class="admin-card__dot"></span>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <h1 class="topbar__title">Products</h1>
+          <p class="topbar__subtitle">Manage all products in your store.</p>
+        </div>
+        <button class="add-btn" id="process-btn">
+          <svg viewBox="0 0 24 24" class="add-btn__icon"><path d="M12 5v14M5 12h14"/></svg>
+          Add Product
+        </button>
+      </header>
+
+      <!-- PRODUCTS TABLE -->
+      <div class="panel">
+        <div class="table-wrap">
+          <div class="table__row table__row--head">
+            <span class="table__cell table__cell--num">#</span>
+            <span class="table__cell table__cell--product">Product</span>
+            <span class="table__cell table__cell--category">Category</span>
+            <span class="table__cell table__cell--price">Price</span>
+            <span class="table__cell table__cell--stock">Stock</span>
+            <span class="table__cell table__cell--status">Status</span>
+          </div>
+
+          <% products.map(function(value, key) { %>
+          <div class="table__row">
+            <span class="table__cell table__cell--num table__muted"><%= key + 1 %></span>
+            <span class="table__cell table__cell--product">
+              <span class="product-name"><%= value.productName %></span>
+            </span>
+            <span class="table__cell table__cell--category table__muted"><%= value.productCollection %></span>
+            <span class="table__cell table__cell--price">$<%= value.productPrice %></span>
+            <span class="table__cell table__cell--stock table__muted"><%= value.productLeftCount %></span>
+            <span class="table__cell table__cell--status">
+              <select class="status-select new-product-status" id="<%= value._id %>">
+                <option value="PAUSE"   <%= value.productStatus === 'PAUSE'   ? 'selected' : '' %>>PAUSE</option>
+                <option value="PROCESS" <%= value.productStatus === 'PROCESS' ? 'selected' : '' %>>PROCESS</option>
+                <option value="DELETE"  <%= value.productStatus === 'DELETE'  ? 'selected' : '' %>>DELETE</option>
+              </select>
+            </span>
+          </div>
+          <% }) %>
+
+        </div>
+      </div>
+
+      
+
+      <!-- NEW PRODUCT FORM -->
+      <div class="panel panel--form" id="new-product-form" style="display:none;">
+        <h2 class="form__title">New Product Detail</h2>
+
         <form
           onsubmit="return validateForm()"
           action="/admin/product/create"
           method="POST"
-          class="dish-container"
           enctype="multipart/form-data"
         >
-          <div class="long-input" style="display: flex; align-items: center">
-            <span class="new-dish-txt">NEW PRODUCT DETAIL</span>
-          </div>
-          <div class="login-input-frame">
-            <div class="long-input">
+          <div class="form__row">
+            <div class="form__group form__group--full">
               <label>Product Name</label>
-              <input
-                type="text"
-                placeholder="Name"
-                name="productName"
-                class="product-name"
-              />
+              <input type="text" placeholder="Name" name="productName" class="product-name-input" />
             </div>
-            <input
-              name="productStatus"
-              value="PAUSE"
-              class="product-status"
-              hidden
-            />
+            <input name="productStatus" value="PAUSE" class="product-status" hidden />
           </div>
-          <div class="half-input-frame">
-            <div class="half-input">
+
+          <div class="form__row">
+            <div class="form__group">
               <label>Product Price</label>
-              <input
-                type="number"
-                placeholder="Price"
-                name="productPrice"
-                class="product-price"
-              />
+              <input type="number" placeholder="Price" name="productPrice" class="product-price" />
             </div>
-            <div class="half-input">
+            <div class="form__group">
               <label>Product Left Counts</label>
-              <input
-                type="number"
-                placeholder="Counts"
-                name="productLeftCount"
-                class="product-left-count"
-              />
+              <input type="number" placeholder="Counts" name="productLeftCount" class="product-left-count" />
             </div>
           </div>
-          <div class="half-input-frame">
-            <div class="half-input">
+
+          <div class="form__row">
+            <div class="form__group">
               <label>Product Type</label>
               <select class="product-collection" name="productCollection">
-                <option value="DISH" selected>Dish</option>
-                <option value="SALAD">Salad</option>
-                <option value="DESSERT">Dessert</option>
-                <option value="DRINK">Drink</option>
+                <option value="PROTEIN" selected>Protein</option>
+                <option value="CREATINE">Creatine</option>
+                <option value="MASS_GAINER">MassGainer</option>
+                <option value="PRE_WORKOUT">PreWorkout</option>
                 <option value="OTHER">Other</option>
               </select>
             </div>
-
-            <div class="half-input" id="product-collection">
-              <label>Dish Volume</label>
+            <div class="form__group" id="product-collection">
+              <label>Product Volume</label>
               <select class="product-size" name="productSize">
                 <option value="SMALL">Small</option>
                 <option value="NORMAL" selected>Normal</option>
                 <option value="LARGE">Large</option>
-                <option value="SET">Set</option>
-              </select>
-            </div>
-
-            <div class="half-input" id="product-volume" style="display: none">
-              <label>Drink Volume</label>
-              <select class="product-volume" name="productVolume">
-                <option value="0.5">0,5 liters</option>
-                <option value="1" selected>1 liters</option>
-                <option value="1.2">1,2 liters</option>
-                <option value="1.5">1,5 liters</option>
-                <option value="2">2 liters</option>
               </select>
             </div>
           </div>
-          <div class="long-input">
-            <label>Product Description</label>
-            <textarea name="productDesc" class="product-desc"></textarea>
+
+          <div class="form__row">
+            <div class="form__group form__group--full">
+              <label>Product Description</label>
+              <textarea name="productDesc" class="product-desc"></textarea>
+            </div>
           </div>
 
-          <div class="img-frame">
-            <label>Product Images</label>
-            <div class="media-frame">
-              <div class="upload-img-box">
-                <img src="/img/upload.svg" class="1" id="image-section-1" />
-                <input
-                  type="file"
-                  id="file"
-                  name="productImages"
-                  class="image-one"
-                  required
-                  onchange="previewFileHandler(this, 1)"
-                  
-                />
-              </div>
-              <div class="upload-img-box">
-                <img src="/img/upload.svg" class="2" id="image-section-2" />
-                <input
-                  type="file"
-                  id="file"
-                  name="productImages"
-                  class="image-two"
-                  onchange="previewFileHandler(this, 2)"
-                />
-              </div>
-              <div class="upload-img-box">
-                <img src="/img/upload.svg" class="3" id="image-section-3" />
-                <input
-                  type="file"
-                  id="file"
-                  name="productImages"
-                  class="image-three"
-                  onchange="previewFileHandler(this, 3)"
-                />
-              </div>
-              <div class="upload-img-box">
-                <img src="/img/upload.svg" class="4" id="image-section-4" />
-                <input
-                  type="file"
-                  id="file"
-                  name="productImages"
-                  class="image-four"
-                  onchange="previewFileHandler(this, 4)"
-                />
-              </div>
-              <div class="upload-img-box">
-                <img src="/img/upload.svg" class="5" id="image-section-5" />
-                <input
-                  type="file"
-                  id="file"
-                  name="productImages"
-                  class="image-five"
-                  onchange="previewFileHandler(this, 5)"
-                />
+          
+
+          <div class="form__row">
+            <div class="form__group form__group--full">
+              <label>Product Images</label>
+              <div class="img-upload-row">
+                <div class="upload-img-box ">
+                  <img src="/img/upload.svg" id="image-section-1" />
+                  <input type="file" name="productImages" class="image-one" required onchange="previewFileHandler(this, 1)" />
+                </div>
+                <div class="upload-img-box">
+                  <img src="/img/upload.svg" id="image-section-2" />
+                  <input type="file" name="productImages" class="image-two" onchange="previewFileHandler(this, 2)" />
+                </div>
+                <div class="upload-img-box">
+                  <img src="/img/upload.svg" id="image-section-3" />
+                  <input type="file" name="productImages" class="image-three" onchange="previewFileHandler(this, 3)" />
+                </div>
+                <div class="upload-img-box">
+                  <img src="/img/upload.svg" id="image-section-4" />
+                  <input type="file" name="productImages" class="image-four" onchange="previewFileHandler(this, 4)" />
+                </div>
+                <div class="upload-img-box">
+                  <img src="/img/upload.svg" id="image-section-5" />
+                  <input type="file" name="productImages" class="image-five" onchange="previewFileHandler(this, 5)" />
+                </div>
               </div>
               <input name="restaurantIid" class="restaurant-id" hidden />
             </div>
           </div>
 
-          <div class="operation-buttons">
-            <button class="btn btn-danger" id="cancel-btn">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="create-btn">
-              Create
-            </button>
+          <div class="form__actions">
+            <button type="button" class="btn-cancel" id="cancel-btn">Cancel</button>
+            <button type="submit" class="btn-create" id="create-btn">Create</button>
           </div>
         </form>
       </div>
-    </div>
+
+    </main>
+
+
   </div>
 
   <script type="text/javascript" src="/js/products.js"></script>

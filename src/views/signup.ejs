@@ -7,17 +7,17 @@
     <form action="/admin/signup" method="POST" enctype="multipart/form-data">
       <div class="signup-frame" style="width: 650px">
         <div class="signup-top">
-          <span>Signup</span>
-          <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
+          <span>Create Account</span>
+          <div>Go back <a href="/admin" style="color: #2f7a52">Home</a></div>
           <p>
             Already signed up?
-            <a href="/admin/login" style="color: #6440fb">Login</a>
+            <a href="/admin/login" style="color: #2f7a52">Login</a>
           </p>
         </div>
 
         <div class="sign-input-frame" style="justify-content: space-between">
           <div class="sign-up-frame">
-            <label>Restaurant *</label>
+            <label>Store *</label>
             <input
               type="text"
               name="memberNick"
@@ -49,7 +49,10 @@
             />
           </div>
           <div class="sign-up-frame">
-            <label>Repeat password *</label>
+            <label>
+              Repeat password *
+              <span class="confirm-status"></span>
+            </label>
             <input
               type="password"
               name="confirmPassword"
@@ -62,12 +65,22 @@
 
         <div class="signup-input-frame">
           <div class="media-frame">
-            <img class="upload-img-frame" src="/img/default.jpeg" />
+            <div class="upload-img-frame">
+              <img class="upload-img-preview" src="/img/default.jpeg" />
+              <span class="upload-img-badge">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"
+                  />
+                  <circle cx="12" cy="13" r="3.5" />
+                </svg>
+              </span>
+            </div>
             <div class="upload-container">
               <span class="media-text">Product image</span>
               <div
                 class="file-box bs3-primary preview-image"
-                style="margin-top: 25px; display: flex"
+                style="margin-top: 20px; display: flex"
               >
                 <input
                   class="upload-name"
@@ -85,7 +98,7 @@
                 />
               </div>
               <p class="thumbnail-desc">
-                Please upload restaurant image.<br />
+                Please upload Store image.<br />
                 Attention only:.jpg, .jpeg, or .png. <br />
                 formats allowed!
               </p>
@@ -96,7 +109,7 @@
         <input name="memberType" value="RESTAURANT" hidden />
 
         <button class="signup-btn btn" name="signup" type="submit">
-          Signup
+          Create Account
         </button>
       </div>
     </form>

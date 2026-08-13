@@ -1,4 +1,3 @@
-console.log("Signup frontend javascript file");
 $(function () {
   const fileTarget = $(".file-box .upload-hidden");
   let filename;
@@ -15,7 +14,7 @@ $(function () {
         if (uploadFile) {
           console.log(URL.createObjectURL(uploadFile));
 
-          $(".upload-img-frame")
+          $(".upload-img-preview")
             .attr("src", URL.createObjectURL(uploadFile))
             .addClass("success");
         }
@@ -26,13 +25,49 @@ $(function () {
       $(this).siblings(".upload-name").val(filename);
     }
   });
+
+  // ===== CONFIRM PASSWORD — REAL-TIME TEKSHIRUV =====
+  const passwordInput = $(".member-password");
+  const confirmInput = $(".confirm-password");
+  const confirmStatus = $(".confirm-status");
+
+  function checkPasswordMatch() {
+    const password = passwordInput.val();
+    const confirm = confirmInput.val();
+
+    // ikkalasi ham bo'sh bo'lmasa va bir xil bo'lsa
+    if (confirm.length > 0 && password === confirm) {
+      confirmInput.removeClass("error").addClass("confirmed");
+      confirmStatus
+        .text("Confirmed")
+        .removeClass("confirm-status--error")
+        .addClass("confirm-status--visible");
+    } else if (confirm.length > 0) {
+      // yozilgan lekin mos kelmayapti — xato holat
+      confirmInput.removeClass("confirmed").addClass("error");
+      confirmStatus
+        .text("Passwords don't match")
+        .addClass("confirm-status--visible confirm-status--error");
+    } else {
+      // input hali bo'sh
+      confirmInput.removeClass("confirmed error");
+      confirmStatus
+        .text("")
+        .removeClass("confirm-status--visible confirm-status--error");
+    }
+  }
+
+  // har ikkala inputga ham eshituvchi qo'yamiz
+  // (chunki asosiy parol keyinroq o'zgartirilsa ham qayta tekshirilsin)
+  passwordInput.on("input", checkPasswordMatch);
+  confirmInput.on("input", checkPasswordMatch);
 });
 
 function validateSignupForm() {
   const memberNick = $(".member-nick").val();
   const memberPhone = $(".member-phone").val();
   const memberPasssword = $(".member-password").val();
-  const confirmPassword = $(".confirm-pasword").val();
+  const confirmPassword = $(".confirm-password").val();
 
   if (
     memberNick === "" ||

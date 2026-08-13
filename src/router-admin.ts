@@ -1,9 +1,9 @@
 import expres from "express";
 const routerAdmin = expres.Router();
-import restaurantContoller from "./controllers/restaurant_controller";
+import restaurantContoller from "./controllers/store_controller";
 import productController from "./controllers/product_controller";
 import makeUploader from "./libs/utils/uploader";
-import restaurantController from "./controllers/restaurant_controller";
+import storeController from "./controllers/store_controller";
 
 /** Restaurant  */
 routerAdmin.get("/", restaurantContoller.goHome);
@@ -44,12 +44,12 @@ routerAdmin.post(
 routerAdmin.get(
   "/user/all",
   restaurantContoller.verifyRestaurant,
-  restaurantController.getUsers,
+  storeController.getUsers,
 );
 routerAdmin.post(
   "/user/edit",
   restaurantContoller.verifyRestaurant,
-  restaurantController.updateChosenUser,
+  storeController.updateChosenUser,
 );
 
 export default routerAdmin;

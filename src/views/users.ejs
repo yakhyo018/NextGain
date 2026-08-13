@@ -3,8 +3,10 @@
 <link rel="stylesheet" type="text/css" href="/css/users.css" />
 
 <body>
-  <div class="users-container">
-    <% if(!member) { %>
+  <% if(!member) { %>
+
+  <!-- ===== LOGGED-OUT STATE ===== -->
+  <div class="users-container users-container--guest">
     <div class="navigation-menu">
       <ul class="nav justify-content-center">
         <li class="nav-item" style="cursor: pointer">
@@ -22,66 +24,98 @@
     <div class="users-frame" style="color: #dddddd">
       <div class="board" style="font-size: 40px">Please login first!</div>
     </div>
+  </div>
 
-    <% } else { %>
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/product/all">Menu</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/user/all">Users</a>
-        </li>
-        <li
-          class="nav-item"
-          style="cursor: pointer"
-          onclick="return confirm('Do you really want to logout?')"
-        >
-          <a class="nav-link" href="/admin/logout">Logout</a>
-        </li>
-      </ul>
-    </div>
+  <% } else { %>
 
-    <div class="users-frame">
-      <div class="board">
-        <div class="user-table">
-          <span class="header-name" style="margin-bottom: 30px"
-            >All Users List</span
-          >
-          <table class="table table-hover table-sm">
-            <thead class="thead-light">
-              <tr class="thead-light">
-                <th scope="col">No</th>
-                <th scope="col">Name</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <!--  LOOP PRODUCTS: START  -->
-            <% users.map(function(value, index) { %>
-              <tbody style="background: white">
-              <td><%= index+1 %></td>
-              <td><%= value.memberNick %></td>
-              <td><%= value.memberPhone %></td>
-              <td style="width: 13%">
-                <select class="spec-select member-status" id="<%= value._id %>">
-                  <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected' : '' %> >ACTIVE</option>
-                  <option value="BLOCK" <%= value.memberStatus === 'BLOCK' ? 'selected' : '' %> >BLOCK</option>
-                  <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected' : '' %> >DELETE</option>
-                </select>
-              </td>
-            </tbody>
-           <% }) %> 
-            <!--  LOOP PRODUCTS: END  -->
-          </table>
+  <!-- ===== LOGGED-IN STATE (Products bilan bir xil layout) ===== -->
+  <div class="layout">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand__sport">Next</span><span class="brand__pit">Gain</span>
+        <div class="brand__sub">Admin Panel</div>
+      </div>
+
+      <nav class="nav">
+        <a href="/admin" class="nav__item">
+          <svg viewBox="0 0 24 24" class="nav__icon"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+          Home
+        </a>
+        <a href="/admin/product/all" class="nav__item">
+          <svg viewBox="0 0 24 24" class="nav__icon"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+          Products
+        </a>
+        <a href="/admin/user/all" class="nav__item nav__item--active">
+          <svg viewBox="0 0 24 24" class="nav__icon"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><path d="M16 7a3 3 0 0 1 0 6"/><path d="M17 14c2.8.5 5 2.4 5 5"/></svg>
+          Users
+        </a>
+        <a href="/admin/logout" class="nav__item" onclick="return confirm('Do you want to logout?');">
+          <svg viewBox="0 0 24 24" class="nav__icon"><path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="admin-card">
+        <img class="admin-card__avatar" src="/img/admin.png" alt="Admin avatar" />
+        <div>
+          <div class="admin-card__name">Admin</div>
+          <div class="admin-card__role">Super Admin</div>
+        </div>
+        <span class="admin-card__dot"></span>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <h1 class="topbar__title">Users</h1>
+          <p class="topbar__subtitle">Manage all users in your store.</p>
+        </div>
+      </header>
+
+      <!-- USERS TABLE -->
+      <div class="panel">
+        <div class="user-table-wrap">
+          <div class="user-table__row user-table__row--head">
+            <span class="user-table__cell user-table__cell--num">#</span>
+            <span class="user-table__cell user-table__cell--name">Name</span>
+            <span class="user-table__cell user-table__cell--phone">Phone</span>
+            <span class="user-table__cell user-table__cell--joined">Signed Up</span>
+            <span class="user-table__cell user-table__cell--status">Status</span>
+          </div>
+
+          <% users.map(function(value, index) { %>
+          <div class="user-table__row">
+            <span class="user-table__cell user-table__cell--num user-table__muted"><%= index + 1 %></span>
+            <span class="user-table__cell user-table__cell--name">
+              <span class="member-name"><%= value.memberNick %></span>
+            </span>
+            <span class="user-table__cell user-table__cell--phone user-table__muted"><%= value.memberPhone %></span>
+            <span class="user-table__cell user-table__cell--joined user-table__muted">
+              <%= new Date(value.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+            </span>
+            <span class="user-table__cell user-table__cell--status">
+              <select class="spec-select member-status" id="<%= value._id %>">
+                <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected' : '' %>>ACTIVE</option>
+                <option value="BLOCK"  <%= value.memberStatus === 'BLOCK'  ? 'selected' : '' %>>BLOCK</option>
+                <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected' : '' %>>DELETE</option>
+              </select>
+            </span>
+          </div>
+          <% }) %>
+
         </div>
       </div>
-    </div>
-    <% } %>
+
+    </main>
   </div>
+
+  <% } %>
 
   <script type="text/javascript" src="/js/users.js"></script>
 </body>

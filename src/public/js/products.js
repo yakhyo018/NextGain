@@ -1,6 +1,17 @@
-console.log("Products frontend javascript file");
+function applyStatusClass(selectEl) {
+  const val = $(selectEl).val();
+  $(selectEl).removeClass("status--process status--pause status--delete");
+  if (val === "PROCESS") $(selectEl).addClass("status--process");
+  else if (val === "PAUSE") $(selectEl).addClass("status--pause");
+  else if (val === "DELETE") $(selectEl).addClass("status--delete");
+}
 
 $(function () {
+  // Sahifa yuklanganda har bir status select'iga to'g'ri rang berish
+  $(".new-product-status").each(function () {
+    applyStatusClass(this);
+  });
+
   $(".product-collection").on("change", () => {
     const selectedValue = $(".product-collection").val();
     if (selectedValue === "DRINK") {
@@ -13,12 +24,22 @@ $(function () {
   });
 
   $("#process-btn").on("click", () => {
-    $(".dish-container").slideToggle(500);
+    $("#new-product-form").slideToggle(500, function () {
+      $("html, body").animate(
+        { scrollTop: $("#new-product-form").offset().top - 20 },
+        400,
+      );
+    });
     $("#process-btn").css("display", "none");
   });
 
   $("#cancel-btn").on("click", () => {
-    $(".dish-container").slideToggle(100);
+    $("#new-product-form").slideToggle(300, function () {
+      $("html, body").animate(
+        { scrollTop: $("#new-product-form").offset().top + 20 },
+        400,
+      );
+    });
     $("#process-btn").css("display", "flex");
   });
 
@@ -40,6 +61,7 @@ $(function () {
 
       if (result.data) {
         console.log("Product updated!");
+        applyStatusClass(this);
         $(".new-product-status").blur();
       } else {
         alert("Product update failed!");
@@ -52,20 +74,18 @@ $(function () {
 });
 
 function validateForm() {
-  const productName = $(".product-name").val();
+  const productName = $(".product-name-input").val();
   const productPrice = $(".product-price").val();
   const productLeftCount = $(".product-left-count").val();
   const productCollection = $(".product-collection").val();
   const productDesc = $(".product-desc").val();
-  const productStatus = $(".product-status").val();
 
   if (
     productName === "" ||
     productPrice === "" ||
     productLeftCount === "" ||
     productCollection === "" ||
-    productDesc === "" ||
-    productStatus === ""
+    productDesc === ""
   ) {
     alert("Please insert all details!");
     return false;
@@ -78,19 +98,19 @@ function previewFileHandler(input, order) {
   const imgClassName = input.className;
   console.log("input:", input);
 
-  const file = $(`.${imgClassName}`).get(0).files[0];
+  const file = input.files[0];
+  if (!file) return;
+
   const fileType = file["type"];
   const validImageType = ["image/jpg", "image/jpeg", "image/png"];
 
   if (!validImageType.includes(fileType)) {
     alert("Please insert only jpeg, jpg and png!");
   } else {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function () {
-        $(`#image-section-${order}`).attr("src", reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onload = function () {
+      $(`#image-section-${order}`).attr("src", reader.result);
+    };
+    reader.readAsDataURL(file);
   }
 }
