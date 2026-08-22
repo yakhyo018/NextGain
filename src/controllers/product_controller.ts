@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import fs from "fs"; // @claude-change: used to clean up orphan uploads
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { AdminRequest, ExtendedRequest } from "../libs/types/member";
@@ -88,6 +89,14 @@ productController.createNewProduct = async (
       `<script> alert("Succesfully  creation"); window.location.replace('/admin/product/all')</script>`,
     );
   } catch (err) {
+    // @claude-change: this route also saves files before it validates, so a
+    // failed create used to leave the image sitting in ./uploads/products with
+    // nothing in the database pointing at it.
+    const files: Express.Multer.File[] = req.files ?? [];
+    await Promise.all(
+      files.map((file) => fs.promises.unlink(file.path).catch(() => undefined)),
+    );
+
     console.log("Error, createNewProduct", err);
     const message =
       err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
@@ -97,19 +106,73 @@ productController.createNewProduct = async (
   }
 };
 
-productController.updateChosenProduct = async (req: Request, res: Response) => {
-  try {
-    console.log("updateChosenProduct");
-    const id = req.params.id;
-    console.log("id:", id);
+/**
+ * @claude-change — updateChosenProduct now also stores uploaded images.
+ *
+ * The route already runs makeUploader("products").array("productImages", 5),
+ * so multer has written the files to ./uploads/products and filled req.files
+ * by the time we get here. Before, this handler ignored them completely and
+ * only forwarded req.body.
+ */
+productController.updateChosenProduct = async (
+  req: AdminRequest,
+  res: Response,
+) => {
+  const files: Express.Multer.File[] = req.files ?? [];
 
-    const result = await productService.updateChosenProduct(
+  try {
+    const id = req.params.id;
+
+    // multer's file.path is "uploads/products/xxx.jpg" on mac/linux but
+    // "uploads\products\xxx.jpg" on windows — the browser needs forward slashes
+    const newImages = files.map((file) => file.path.split("\\").join("/"));
+
+    // @claude-change: loud enough to debug from the terminal. If files is 0
+    // here while a file did land in ./uploads/products, the request reached a
+    // different route than POST /admin/product/:id
+    console.log("=== updateChosenProduct ===");
+    console.log("  url  :", req.originalUrl);
+    console.log("  id   :", id);
+    console.log("  files:", files.length, newImages);
+    console.log("  body :", req.body);
+
+    // form-data sends every untouched box as "", which would blank the field
+    const fields: T = {};
+    for (const [key, value] of Object.entries(req.body ?? {})) {
+      if (value !== "" && value !== undefined && value !== null)
+        fields[key] = value;
+    }
+
+    // optional switch: send imageMode=replace to drop the old images
+    const imageMode: "append" | "replace" =
+      fields.imageMode === "replace" ? "replace" : "append";
+    delete fields.imageMode;
+
+    const { product, replacedImages } = await productService.updateChosenProduct(
       id as string,
-      req.body,
+      fields,
+      newImages,
+      imageMode,
     );
 
-    res.status(HttpCode.OK).json({ data: result });
+    // in replace mode the previous files are no longer referenced by any
+    // document, so drop them from disk once the write has succeeded
+    await Promise.all(
+      replacedImages.map((p: string) =>
+        fs.promises.unlink(p).catch(() => undefined),
+      ),
+    );
+
+    console.log("  saved productImages:", product.productImages);
+
+    res.status(HttpCode.OK).json({ data: product });
   } catch (err) {
+    // multer saved the files before this handler ran. If the update was
+    // refused they are orphans on disk, so remove them.
+    await Promise.all(
+      files.map((file) => fs.promises.unlink(file.path).catch(() => undefined)),
+    );
+
     console.log("Error,updateChosenProduct", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standards.code).json(Errors.standards);

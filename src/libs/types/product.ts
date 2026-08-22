@@ -42,7 +42,9 @@ export interface ProductInput {
 }
 
 export interface ProductUpdateInput {
-  _id: Types.ObjectId;
+  // @claude-change: optional now — updateChosenProduct takes the id as its own
+  // argument (it comes from the :id route param), so the body need not carry it
+  _id?: Types.ObjectId;
   productStatus?: ProductStatus;
   productCollection?: ProductCollection;
   productName?: string;

@@ -15,6 +15,9 @@ import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
 import ViewService from "./View.service";
 
+/** @claude-change — how many images one product may hold */
+const MAX_PRODUCT_IMAGES = 5;
+
 class ProductService {
   [x: string]: any;
   private readonly productModel;
@@ -116,17 +119,70 @@ class ProductService {
     }
   }
 
+  /**
+   * @claude-change — now also attaches uploaded images.
+   *
+   * @param id         the :id from the route
+   * @param input      the text fields of the form (productName, price ...)
+   * @param newImages  paths of the files multer already wrote to disk,
+   *                   e.g. ["uploads/products/9f3c-...jpg"]
+   * @param imageMode  "append" keeps the images the product already has,
+   *                   "replace" throws them away and keeps only the new ones
+   */
   public async updateChosenProduct(
     id: string,
     input: ProductUpdateInput,
-  ): Promise<Product> {
-    id = shapeIntoMongooseObjectId(id);
+    newImages: string[] = [],
+    imageMode: "append" | "replace" = "append",
+  ): Promise<{ product: Product; replacedImages: string[] }> {
+    const productId = shapeIntoMongooseObjectId(id);
+
+    // productImages may only come from req.files. If the body were allowed to
+    // set it, anyone could point a product at any path on the server.
+    const fields: T = { ...input };
+    delete fields.productImages;
+    delete fields._id; // _id is immutable in mongo, sending it errors out
+
+    const update: T = {};
+    if (Object.keys(fields).length > 0) update.$set = fields;
+
+    /** files the product no longer points at — the controller deletes them */
+    let replacedImages: string[] = [];
+
+    if (newImages.length > 0) {
+      // the product must exist before we attach anything to it
+      const existing = await this.productModel.findById(productId).exec();
+      if (!existing) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+      const current = existing.productImages ?? [];
+
+      if (imageMode === "replace") {
+        // @claude-change: the old files stop being referenced here, so hand
+        // them back instead of leaving them behind in ./uploads/products
+        replacedImages = [...current];
+        update.$set = { ...(update.$set ?? {}), productImages: newImages };
+      } else {
+        if (current.length + newImages.length > MAX_PRODUCT_IMAGES)
+          throw new Errors(
+            HttpCode.BAD_REQUEST,
+            `This product already holds ${current.length} image(s) and you sent ${newImages.length}; the limit is ${MAX_PRODUCT_IMAGES}. Send imageMode=replace to swap them instead of appending.`,
+          );
+
+        // $push + $each appends atomically. Reading the doc, pushing in JS and
+        // calling save() would lose one of two uploads arriving together.
+        update.$push = { productImages: { $each: newImages } };
+      }
+    }
+
+    if (Object.keys(update).length === 0)
+      throw new Errors(HttpCode.BAD_REQUEST, Message.NOTHING_TO_UPDATE);
+
     const result = await this.productModel
-      .findByIdAndUpdate({ _id: id }, input, { new: true })
+      .findByIdAndUpdate(productId, update, { new: true })
       .exec();
-    if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-    console.log("result:", result);
-    return result;
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return { product: result, replacedImages };
   }
 }
 

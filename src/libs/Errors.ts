@@ -21,18 +21,27 @@ export enum Message {
   USED_NICK_PHONE = "you are inserting already used nick or phone!",
   NOT_AUTHENTICATED = "You are not authenticated, login first!",
   TOKEN_CREATION_FAILED = "Token creation error!",
+
+  /** @claude-change — product image upload */
+  NOTHING_TO_UPDATE = "Nothing was sent to update!",
+  TOO_MANY_IMAGES = "A product can hold at most 5 images!",
+  WRONG_IMAGE_FORMAT = "Only jpeg, jpg, png and webp images are allowed!",
 }
 
 class Errors extends Error {
   public code: HttpCode;
-  public message: Message;
+  // @claude-change: was `Message`, so an error could never carry numbers the
+  // caller needs ("already has 4, you sent 3"). Plain strings are allowed now.
+  public message: Message | string;
 
+  // @claude-change: the key was "massage", so every fallback error reached the
+  // client without a `message` field and the frontend showed a generic text.
   static standards = {
     code: HttpCode.INTERNAL_SERVER_ERROR,
-    massage: Message.SOMETHING_WENT_WRONG,
+    message: Message.SOMETHING_WENT_WRONG,
   };
 
-  constructor(statusCode: HttpCode, statusMessage: Message) {
+  constructor(statusCode: HttpCode, statusMessage: Message | string) {
     super();
     this.code = statusCode;
     this.message = statusMessage;
