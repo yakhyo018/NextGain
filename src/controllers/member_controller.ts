@@ -100,16 +100,46 @@ memberContoller.getMemberDetail = async (
   }
 };
 
+/**
+ * @claude-change — guard the two unique fields.
+ *
+ * memberNick and memberPhone carry `unique: true, sparse: true` in
+ * Member.model. Writing "" into them does not skip the index (only a missing
+ * field does), so the second member whose phone became "" hits an E11000
+ * duplicate key error, which surfaced as a plain 500 on My Page.
+ */
 memberContoller.updateMember = async (req: ExtendedRequest, res: Response) => {
   try {
     console.log("updateMember");
-    const input: MemberUpdateInput = req.body;
+    const input: MemberUpdateInput = { ...req.body };
+
+    // an empty identity field means "leave it as it is", never "blank it"
+    if (!String(input.memberNick ?? "").trim()) delete input.memberNick;
+    if (!String(input.memberPhone ?? "").trim()) delete input.memberPhone;
+
     if (req.file) input.memberImage = req.file.path;
+
+    if (Object.keys(input).length === 0)
+      throw new Errors(HttpCode.BAD_REQUEST, "Nothing was sent to update!");
+
+    console.log("  update input:", input);
+
     const result = await memberService.updateMember(req.member, input);
 
     res.status(HttpCode.OK).json(result);
   } catch (err) {
     console.log("Error, updateMember", err);
+
+    // a duplicate key is a client mistake, not a server fault -- say which
+    // field collided instead of returning a bare 500
+    const mongoErr = err as { code?: number; keyPattern?: Record<string, 1> };
+    if (mongoErr?.code === 11000) {
+      const field = Object.keys(mongoErr.keyPattern ?? {})[0] ?? "value";
+      return res
+        .status(HttpCode.BAD_REQUEST)
+        .json({ code: HttpCode.BAD_REQUEST, message: `This ${field} is already taken!` });
+    }
+
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standards.code).json(Errors.standards);
   }
