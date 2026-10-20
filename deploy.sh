@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # NextGain deploy: kodni yangilaydi, build qiladi va PM2 orqali qayta ishga tushiradi.
-# Ishlatish: ./deploy.sh [branch]   (default: develop)
+# Ishlatish: ./deploy.sh [branch]   (default: master)
 set -euo pipefail
 
 APP_NAME="nextgain"
-BRANCH="${1:-develop}"
+BRANCH="${1:-master}"
 
 cd "$(dirname "$0")"
 
