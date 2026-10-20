@@ -5,7 +5,12 @@
   "main": "src/server.ts",
   "scripts": {
     "start:dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs');fs.cpSync('src/views','dist/views',{recursive:true});fs.cpSync('src/public','dist/public',{recursive:true})\"",
+    "start": "node dist/server.js",
+    "start:prod": "npm run build && pm2 start ecosystem.config.js",
+    "restart:prod": "npm run build && pm2 restart nextgain",
+    "stop:prod": "pm2 stop nextgain",
+    "logs": "pm2 logs nextgain",
     "train": "nodemon --exec ts-node src/train.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
