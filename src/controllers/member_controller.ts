@@ -10,7 +10,7 @@ import {
 } from "../libs/types/member";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import AuthService from "../models/Auth.service";
-import { AUTH_TIMER } from "../libs/config";
+import { AUTH_TIMER, COOKIE_DOMAIN } from "../libs/config";
 import { log } from "console";
 import { accessSync } from "fs";
 
@@ -42,6 +42,7 @@ memberContoller.Signup = async (req: Request, res: Response) => {
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
       httpOnly: false,
+      domain: COOKIE_DOMAIN,
     });
 
     res.status(HttpCode.CREATED).json({ member: result, accessToken: token });
@@ -62,6 +63,7 @@ memberContoller.Login = async (req: Request, res: Response) => {
     res.cookie("accessToken", token, {
       maxAge: AUTH_TIMER * 3600 * 1000,
       httpOnly: false,
+      domain: COOKIE_DOMAIN,
     });
 
     res.status(HttpCode.OK).json({ member: result, accessToken: token });
@@ -75,7 +77,12 @@ memberContoller.Login = async (req: Request, res: Response) => {
 memberContoller.logout = (req: ExtendedRequest, res: Response) => {
   try {
     console.log("logout");
-    res.cookie("accessToken", null, { maxAge: 0, httpOnly: true });
+    res.cookie("accessToken", null, {
+      maxAge: 0,
+      httpOnly: true,
+      // must match the domain it was set with, or the browser keeps it
+      domain: COOKIE_DOMAIN,
+    });
     res.status(HttpCode.OK).json({ logout: true });
   } catch (err) {
     console.log("Error, logout", err);
